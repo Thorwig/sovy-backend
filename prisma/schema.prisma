@@ -1,0 +1,107 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model User {
+  id          String    @id @default(uuid())
+  email       String    @unique
+  password    String
+  name        String
+  role        Role      @default(CLIENT)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  orders      Order[]
+  favorites   FoodItem[] @relation("UserFavorites")
+  merchant    Merchant?
+}
+
+model Merchant {
+  id           String    @id @default(uuid())
+  userId       String    @unique
+  user         User      @relation(fields: [userId], references: [id])
+  businessName String
+  description  String?   @default("")
+  address      String
+  city         String
+  postalCode   String
+  phone        String
+  imageUrl     String?   @default("")
+  rating       Float     @default(0)
+  reviewCount  Int       @default(0)
+  latitude     Float
+  longitude    Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  foodItems    FoodItem[]
+}
+
+model FoodItem {
+  id          String    @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  originalPrice Float
+  imageUrl    String?
+  quantity    Int
+  expiryDate  DateTime
+  merchantId  String
+  merchant    Merchant  @relation(fields: [merchantId], references: [id])
+  orders      OrderItem[]
+  favoritedBy User[]    @relation("UserFavorites")
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Order {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  status        OrderStatus   @default(PENDING)
+  paymentStatus PaymentStatus @default(PENDING)
+  total         Float
+  items         OrderItem[]
+  pickupTime    DateTime
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model OrderItem {
+  id          String    @id @default(uuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id])
+  foodItemId  String
+  foodItem    FoodItem  @relation(fields: [foodItemId], references: [id])
+  quantity    Int
+  price       Float
+}
+
+enum Role {
+  CLIENT
+  MERCHANT
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PICKED_UP
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+}
