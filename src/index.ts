@@ -24,8 +24,9 @@ orderCleanup.start();
 const allowedOrigins = [
   'http://localhost:5173',          // Local merchant frontend
   'http://localhost:3000',          // Local development
-  'https://sovy-merchant.netlify.app/', // Production merchant frontend
-  'https://sovy-mobile.expo.dev'    // Mobile app
+  'https://sovy-merchant.netlify.app',  // Production merchant frontend (removed trailing slash)
+  'https://sovy-mobile.expo.dev',   // Mobile app
+  'https://sovy-backend.onrender.com'  // Production backend
 ];
 
 app.use(cors({
