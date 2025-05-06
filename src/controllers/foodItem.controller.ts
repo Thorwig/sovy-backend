@@ -1,5 +1,10 @@
-import { Request, Response } from 'express';
+import { Request as ExpressRequest, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
+
+// Extend Express Request to include file property from multer
+interface Request extends ExpressRequest {
+  file?: Express.Multer.File;
+}
 
 const prisma = new PrismaClient();
 
